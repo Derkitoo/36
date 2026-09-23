@@ -29,7 +29,9 @@ import {
   Sparkles,
   BookOpen,
   Radio,
-  MapPin
+  MapPin,
+  Download,
+  Share2
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { QUESTIONS_36, EYE_CONTACT_EXERCISE } from './data/questions36';
@@ -75,6 +77,11 @@ export default function App() {
   const [timeLeft, setTimeLeft] = useState(EYE_CONTACT_EXERCISE.durationSeconds);
   const [isTimerRunning, setIsTimerRunning] = useState(false);
 
+  // PWA Installation
+  const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
+  const [isInstalled, setIsInstalled] = useState(false);
+  const [showPwaModal, setShowPwaModal] = useState(false);
+
   // Spotlight Effect
   const cardRef = useRef<HTMLDivElement>(null);
   const [spotlightPos, setSpotlightPos] = useState({ x: 0, y: 0, opacity: 0 });
@@ -87,6 +94,35 @@ export default function App() {
     document.documentElement.setAttribute('data-theme', theme);
     localStorage.setItem('shadow_theme', theme);
   }, [theme]);
+
+  // Détection PWA & Installation
+  useEffect(() => {
+    const handleBeforeInstall = (e: any) => {
+      e.preventDefault();
+      setDeferredPrompt(e);
+    };
+    window.addEventListener('beforeinstallprompt', handleBeforeInstall);
+
+    if (window.matchMedia('(display-mode: standalone)').matches || (window.navigator as any).standalone) {
+      setIsInstalled(true);
+    }
+
+    return () => window.removeEventListener('beforeinstallprompt', handleBeforeInstall);
+  }, []);
+
+  const handleInstallClick = async () => {
+    sounds.playClick(850);
+    if (deferredPrompt) {
+      deferredPrompt.prompt();
+      const choice = await deferredPrompt.userChoice;
+      if (choice.outcome === 'accepted') {
+        setIsInstalled(true);
+        setDeferredPrompt(null);
+      }
+    } else {
+      setShowPwaModal(true);
+    }
+  };
 
   const toggleTheme = () => {
     sounds.playClick(theme === 'light' ? 950 : 700);
@@ -331,6 +367,31 @@ export default function App() {
             >
               <Maximize2 size={15} />
             </button>
+
+            {!isInstalled && (
+              <button
+                onClick={handleInstallClick}
+                title="Installer comme application native (PWA)"
+                className="glass-pill"
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '5px',
+                  padding: '0 9px',
+                  height: '36px',
+                  borderRadius: '10px',
+                  color: 'var(--accent)',
+                  fontSize: '11px',
+                  fontWeight: '700',
+                  cursor: 'pointer',
+                  borderColor: 'var(--accent-border)',
+                  backgroundColor: 'var(--accent-light)'
+                }}
+              >
+                <Download size={13} />
+                <span className="text-desktop-only">App</span>
+              </button>
+            )}
 
             <button
               onClick={() => setShowCommandPalette(true)}
@@ -1483,6 +1544,149 @@ export default function App() {
                 );
               })}
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal Guide Installation PWA */}
+      {showPwaModal && (
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          backgroundColor: 'var(--modal-overlay)',
+          backdropFilter: 'blur(20px)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          padding: '20px 16px',
+          zIndex: 10000
+        }}>
+          <div className="glass-panel animate-slide-up" style={{
+            width: '100%',
+            maxWidth: '460px',
+            borderRadius: '24px',
+            padding: '26px',
+            backgroundColor: 'var(--modal-bg)',
+            boxShadow: '0 30px 60px rgba(0,0,0,0.25)',
+            position: 'relative'
+          }}>
+            <button
+              onClick={() => setShowPwaModal(false)}
+              style={{
+                position: 'absolute',
+                top: '18px',
+                right: '18px',
+                background: 'none',
+                border: 'none',
+                color: 'var(--text-tertiary)',
+                fontSize: '18px',
+                cursor: 'pointer'
+              }}
+            >
+              ✕
+            </button>
+
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '18px' }}>
+              <div style={{
+                width: '44px',
+                height: '44px',
+                borderRadius: '14px',
+                background: 'linear-gradient(135deg, #e11d48, #be123c)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                boxShadow: '0 8px 20px rgba(225, 29, 72, 0.35)'
+              }}>
+                <Zap size={22} color="#fff" />
+              </div>
+              <div>
+                <h3 style={{ fontSize: '17px', fontWeight: '800', color: 'var(--text-primary)' }}>
+                  Installer L'Ombre
+                </h3>
+                <p style={{ fontSize: '12px', color: 'var(--text-tertiary)' }}>
+                  Application native & 100% hors-ligne
+                </p>
+              </div>
+            </div>
+
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '14px', marginBottom: '22px' }}>
+              <div style={{ display: 'flex', gap: '12px', alignItems: 'flex-start' }}>
+                <span style={{
+                  width: '24px',
+                  height: '24px',
+                  borderRadius: '50%',
+                  backgroundColor: 'var(--accent-light)',
+                  color: 'var(--accent)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  fontSize: '11px',
+                  fontWeight: '800',
+                  flexShrink: 0
+                }}>1</span>
+                <p style={{ fontSize: '12.5px', color: 'var(--text-secondary)', lineHeight: '1.5' }}>
+                  Sur <strong>iPhone (Safari)</strong> : touchez le bouton <strong>Partager</strong> <Share2 size={13} style={{ display: 'inline', margin: '0 2px' }} /> puis <strong>« Sur l'écran d'accueil »</strong> ➕.
+                </p>
+              </div>
+
+              <div style={{ display: 'flex', gap: '12px', alignItems: 'flex-start' }}>
+                <span style={{
+                  width: '24px',
+                  height: '24px',
+                  borderRadius: '50%',
+                  backgroundColor: 'var(--accent-light)',
+                  color: 'var(--accent)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  fontSize: '11px',
+                  fontWeight: '800',
+                  flexShrink: 0
+                }}>2</span>
+                <p style={{ fontSize: '12.5px', color: 'var(--text-secondary)', lineHeight: '1.5' }}>
+                  Sur <strong>Android (Chrome)</strong> : appuyez sur le menu ⋮ puis <strong>« Installer l'application »</strong>.
+                </p>
+              </div>
+
+              <div style={{ display: 'flex', gap: '12px', alignItems: 'flex-start' }}>
+                <span style={{
+                  width: '24px',
+                  height: '24px',
+                  borderRadius: '50%',
+                  backgroundColor: 'var(--accent-light)',
+                  color: 'var(--accent)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  fontSize: '11px',
+                  fontWeight: '800',
+                  flexShrink: 0
+                }}>3</span>
+                <p style={{ fontSize: '12.5px', color: 'var(--text-secondary)', lineHeight: '1.5' }}>
+                  L'application s'ouvre alors en <strong>plein écran sans barre de navigation</strong> et fonctionne sans connexion internet.
+                </p>
+              </div>
+            </div>
+
+            <button
+              onClick={() => setShowPwaModal(false)}
+              style={{
+                width: '100%',
+                padding: '12px',
+                borderRadius: '12px',
+                background: 'linear-gradient(135deg, #e11d48, #be123c)',
+                border: 'none',
+                color: '#fff',
+                fontSize: '13px',
+                fontWeight: '700',
+                cursor: 'pointer'
+              }}
+            >
+              C'est noté
+            </button>
           </div>
         </div>
       )}
