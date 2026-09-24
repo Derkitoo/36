@@ -31,15 +31,17 @@ import {
   Radio,
   MapPin,
   Download,
-  Share2
+  Share2,
+  LayoutDashboard
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { QUESTIONS_36, EYE_CONTACT_EXERCISE } from './data/questions36';
 import type { ProtocolQuestion } from './data/questions36';
 import { TARGET_PROFILES, SCENOGRAPHY_RULES, COLD_READINGS, VOSS_TECHNIQUES, PEAK_END_RULE } from './data/arsenal';
 import { sounds } from './utils/audio';
+import { Dashboard } from './components/Dashboard';
 
-type MainSection = 'scenography' | 'questions' | 'arsenal' | 'climax';
+type MainSection = 'dashboard' | 'scenography' | 'questions' | 'arsenal' | 'climax';
 
 export default function App() {
   // Thème Light par défaut (Apple / OpenRouter)
@@ -51,7 +53,7 @@ export default function App() {
   });
 
   // Section Principale Étenche
-  const [currentSection, setCurrentSection] = useState<MainSection>('questions');
+  const [currentSection, setCurrentSection] = useState<MainSection>('dashboard');
 
   // Protocole 36 Questions
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -426,9 +428,26 @@ export default function App() {
         </header>
       )}
 
-      {/* 2. LES 4 GRANDES SECTIONS ÉTANCHES (CHRONOLOGIE DU DATE) */}
+      {/* 2. LES GRANDES SECTIONS ÉTANCHES DU DATE */}
       {!isZenMode && (
         <nav className="tabs-scroll-container" style={{ marginBottom: '20px' }}>
+          <button
+            onClick={() => {
+              sounds.playClick(900);
+              setCurrentSection('dashboard');
+            }}
+            className="tab-btn-responsive"
+            style={{
+              backgroundColor: currentSection === 'dashboard' ? 'var(--accent-light)' : 'transparent',
+              color: currentSection === 'dashboard' ? 'var(--accent)' : 'var(--text-secondary)',
+              boxShadow: currentSection === 'dashboard' ? 'inset 0 0 0 1px var(--accent-border)' : 'none'
+            }}
+          >
+            <LayoutDashboard size={13} />
+            <span className="text-desktop-only">Cockpit Stratégique</span>
+            <span className="text-mobile-only">Cockpit</span>
+          </button>
+
           <button
             onClick={() => {
               sounds.playClick(750);
@@ -442,7 +461,7 @@ export default function App() {
             }}
           >
             <MapPin size={13} />
-            <span className="text-desktop-only">1. Avant : Calibrage & Profiler</span>
+            <span className="text-desktop-only">1. Avant : Calibrage</span>
             <span className="text-mobile-only">1. Calibrage</span>
           </button>
 
@@ -459,7 +478,7 @@ export default function App() {
             }}
           >
             <Sparkles size={13} />
-            <span className="text-desktop-only">2. Pendant : Les 36 Questions</span>
+            <span className="text-desktop-only">2. Pendant : 36 Questions</span>
             <span className="text-mobile-only">2. Questions</span>
           </button>
 
@@ -476,7 +495,7 @@ export default function App() {
             }}
           >
             <Radio size={13} />
-            <span className="text-desktop-only">3. Urgence : Armes Verbales</span>
+            <span className="text-desktop-only">3. Urgence : Armes</span>
             <span className="text-mobile-only">3. Armes</span>
           </button>
 
@@ -493,10 +512,34 @@ export default function App() {
             }}
           >
             <Clock size={13} />
-            <span className="text-desktop-only">4. Fin : Climax & Départ</span>
+            <span className="text-desktop-only">4. Fin : Climax</span>
             <span className="text-mobile-only">4. Climax</span>
           </button>
         </nav>
+      )}
+
+      {/* =========================================================================
+          SECTION 0 : COCKPIT STRATÉGIQUE (DASHBOARD MODERNE)
+          ========================================================================= */}
+      {currentSection === 'dashboard' && (
+        <Dashboard
+          completedQuestions={completedQuestions}
+          currentIndex={currentIndex}
+          currentQ={currentQ}
+          selectedProfileId={selectedProfileId}
+          onNavigate={setCurrentSection}
+          onJumpToQuestion={jumpToQuestion}
+          onJumpToSet={jumpToSet}
+          timeLeft={timeLeft}
+          isTimerRunning={isTimerRunning}
+          onToggleTimer={() => {
+            if (!isTimerRunning) sounds.playClick(1000);
+            else sounds.playClick(600);
+            setIsTimerRunning(!isTimerRunning);
+          }}
+          onCopySnippet={(text, id) => copyToClipboard(text, id)}
+          copiedId={copiedId}
+        />
       )}
 
       {/* =========================================================================
