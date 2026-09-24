@@ -32,7 +32,8 @@ import {
   MapPin,
   Download,
   Share2,
-  LayoutDashboard
+  LayoutDashboard,
+  Shield
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { QUESTIONS_36, EYE_CONTACT_EXERCISE } from './data/questions36';
@@ -79,10 +80,11 @@ export default function App() {
   const [timeLeft, setTimeLeft] = useState(EYE_CONTACT_EXERCISE.durationSeconds);
   const [isTimerRunning, setIsTimerRunning] = useState(false);
 
-  // PWA Installation
+  // PWA Installation & Mode Camouflage
   const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
   const [isInstalled, setIsInstalled] = useState(false);
   const [showPwaModal, setShowPwaModal] = useState(false);
+  const [isCamouflageActive, setIsCamouflageActive] = useState(false);
 
   // Spotlight Effect
   const cardRef = useRef<HTMLDivElement>(null);
@@ -267,62 +269,111 @@ export default function App() {
     q.id.toString() === searchQuery.trim()
   );
 
+  if (isCamouflageActive) {
+    return (
+      <div 
+        onClick={() => setIsCamouflageActive(false)}
+        style={{
+          minHeight: '100dvh',
+          padding: '24px 20px',
+          backgroundColor: 'var(--bg-surface)',
+          cursor: 'pointer',
+          fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
+        }}
+      >
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px', borderBottom: '1px solid var(--border-subtle)', paddingBottom: '10px' }}>
+          <span style={{ fontSize: '12px', color: 'var(--text-tertiary)', fontWeight: '600' }}>
+            📒 Notes Personnelles • iCloud
+          </span>
+          <span style={{ fontSize: '11px', color: 'var(--text-tertiary)' }}>
+            Touchez pour déverrouiller
+          </span>
+        </div>
+        <h2 style={{ fontSize: '20px', fontWeight: '700', marginBottom: '16px', color: 'var(--text-primary)' }}>
+          To-Do Semaine & Idées
+        </h2>
+        <ul style={{ paddingLeft: '20px', fontSize: '14px', lineHeight: '2.2', color: 'var(--text-secondary)' }}>
+          <li>Rappel : réserver révision voiture jeudi</li>
+          <li>Acheter café en grains & lait d'avoine</li>
+          <li>Finir la lecture du chapitre 4</li>
+          <li>Envoyer le compte-rendu projet</li>
+          <li>Rangement placard entrée</li>
+        </ul>
+      </div>
+    );
+  }
+
   return (
-    <div className="container-responsive" style={{
-      maxWidth: isZenMode ? '820px' : '980px',
-      transition: 'all 0.4s cubic-bezier(0.16, 1, 0.3, 1)'
-    }}>
-      {/* 1. Dynamic Top Bar */}
+    <div className="app-shell">
+      {/* 1. App Header Pinned at Top */}
       {!isZenMode && (
-        <header className="header-responsive">
+        <header className="app-header">
           {/* Brand & Badge */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
             <div style={{
-              width: '38px',
-              height: '38px',
-              borderRadius: '12px',
+              width: '34px',
+              height: '34px',
+              borderRadius: '10px',
               background: 'linear-gradient(135deg, #e11d48 0%, #be123c 100%)',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              boxShadow: '0 8px 20px rgba(225, 29, 72, 0.28)',
+              boxShadow: '0 6px 16px rgba(225, 29, 72, 0.28)',
               flexShrink: 0
             }}>
-              <Zap size={18} color="#fff" />
+              <Zap size={16} color="#fff" />
             </div>
             <div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
-                <h1 style={{ fontSize: '17px', fontWeight: '800', letterSpacing: '-0.4px', color: 'var(--text-primary)' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <h1 style={{ fontSize: '15px', fontWeight: '900', letterSpacing: '-0.3px', color: 'var(--text-primary)' }}>
                   L'OMBRE
                 </h1>
-                <span style={{
-                  fontSize: '9.5px',
+                <span className="pulse-dot" style={{ width: '6px', height: '6px' }} />
+                <span className="text-desktop-only" style={{
+                  fontSize: '9px',
                   fontWeight: '800',
-                  padding: '2px 7px',
-                  borderRadius: '20px',
+                  padding: '2px 6px',
+                  borderRadius: '12px',
                   background: 'var(--accent-light)',
                   color: 'var(--accent)',
-                  border: '1px solid var(--accent-border)',
-                  letterSpacing: '0.8px'
+                  border: '1px solid var(--accent-border)'
                 }}>
-                  ÉDITION STRATÈGE
+                  STRATÈGE
                 </span>
               </div>
-              <p className="text-desktop-only" style={{ fontSize: '11px', color: 'var(--text-tertiary)', marginTop: '2px' }}>
-                Psychologie de la séduction & dynamiques relationnelles
-              </p>
             </div>
           </div>
 
-          {/* Quick Actions (Theme Switcher, Audio, Zen, Palette) */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'nowrap' }}>
+          {/* Quick Actions (Camouflage, Theme, Audio, Zen, Palette) */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
             <button
-              onClick={toggleTheme}
-              title={theme === 'light' ? "Passer en mode sombre (Dark)" : "Passer en mode clair (Light)"}
+              onClick={() => {
+                sounds.playClick(600);
+                setIsCamouflageActive(true);
+              }}
+              title="Mode Camouflage Immédiat (Faux bloc-notes)"
               className="glass-pill"
               style={{
-                width: '36px',
-                height: '36px',
+                width: '34px',
+                height: '34px',
+                borderRadius: '10px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                color: 'var(--accent-gold)',
+                cursor: 'pointer'
+              }}
+            >
+              <Shield size={14} />
+            </button>
+
+            <button
+              onClick={toggleTheme}
+              title={theme === 'light' ? "Passer en mode sombre" : "Passer en mode clair"}
+              className="glass-pill"
+              style={{
+                width: '34px',
+                height: '34px',
                 borderRadius: '10px',
                 display: 'flex',
                 alignItems: 'center',
@@ -331,7 +382,7 @@ export default function App() {
                 cursor: 'pointer'
               }}
             >
-              {theme === 'light' ? <Moon size={15} /> : <Sun size={15} />}
+              {theme === 'light' ? <Moon size={14} /> : <Sun size={14} />}
             </button>
 
             <button
@@ -339,8 +390,8 @@ export default function App() {
               title={isMuted ? "Activer les retours sonores" : "Couper le son"}
               className="glass-pill"
               style={{
-                width: '36px',
-                height: '36px',
+                width: '34px',
+                height: '34px',
                 borderRadius: '10px',
                 display: 'flex',
                 alignItems: 'center',
@@ -349,16 +400,16 @@ export default function App() {
                 cursor: 'pointer'
               }}
             >
-              {isMuted ? <VolumeX size={15} /> : <Volume2 size={15} />}
+              {isMuted ? <VolumeX size={14} /> : <Volume2 size={14} />}
             </button>
 
             <button
               onClick={() => setIsZenMode(true)}
               title="Mode Plein Écran Discret (Touche F)"
-              className="glass-pill"
+              className="glass-pill text-desktop-only"
               style={{
-                width: '36px',
-                height: '36px',
+                width: '34px',
+                height: '34px',
                 borderRadius: '10px',
                 display: 'flex',
                 alignItems: 'center',
@@ -367,7 +418,7 @@ export default function App() {
                 cursor: 'pointer'
               }}
             >
-              <Maximize2 size={15} />
+              <Maximize2 size={14} />
             </button>
 
             {!isInstalled && (
@@ -378,19 +429,19 @@ export default function App() {
                 style={{
                   display: 'flex',
                   alignItems: 'center',
-                  gap: '5px',
-                  padding: '0 9px',
-                  height: '36px',
+                  gap: '4px',
+                  padding: '0 8px',
+                  height: '34px',
                   borderRadius: '10px',
                   color: 'var(--accent)',
-                  fontSize: '11px',
+                  fontSize: '10.5px',
                   fontWeight: '700',
                   cursor: 'pointer',
                   borderColor: 'var(--accent-border)',
                   backgroundColor: 'var(--accent-light)'
                 }}
               >
-                <Download size={13} />
+                <Download size={12} />
                 <span className="text-desktop-only">App</span>
               </button>
             )}
@@ -401,9 +452,9 @@ export default function App() {
               style={{
                 display: 'flex',
                 alignItems: 'center',
-                gap: '6px',
-                padding: '0 10px',
-                height: '36px',
+                gap: '5px',
+                padding: '0 8px',
+                height: '34px',
                 borderRadius: '10px',
                 color: 'var(--text-secondary)',
                 fontSize: '11px',
@@ -411,10 +462,9 @@ export default function App() {
                 cursor: 'pointer'
               }}
             >
-              <Command size={13} />
-              <span>Index</span>
+              <Command size={12} />
               <kbd className="text-desktop-only" style={{
-                fontSize: '9.5px',
+                fontSize: '9px',
                 padding: '2px 4px',
                 borderRadius: '4px',
                 backgroundColor: 'var(--bg-subtle)',
@@ -428,95 +478,8 @@ export default function App() {
         </header>
       )}
 
-      {/* 2. LES GRANDES SECTIONS ÉTANCHES DU DATE */}
-      {!isZenMode && (
-        <nav className="tabs-scroll-container" style={{ marginBottom: '20px' }}>
-          <button
-            onClick={() => {
-              sounds.playClick(900);
-              setCurrentSection('dashboard');
-            }}
-            className="tab-btn-responsive"
-            style={{
-              backgroundColor: currentSection === 'dashboard' ? 'var(--accent-light)' : 'transparent',
-              color: currentSection === 'dashboard' ? 'var(--accent)' : 'var(--text-secondary)',
-              boxShadow: currentSection === 'dashboard' ? 'inset 0 0 0 1px var(--accent-border)' : 'none'
-            }}
-          >
-            <LayoutDashboard size={13} />
-            <span className="text-desktop-only">Cockpit Stratégique</span>
-            <span className="text-mobile-only">Cockpit</span>
-          </button>
-
-          <button
-            onClick={() => {
-              sounds.playClick(750);
-              setCurrentSection('scenography');
-            }}
-            className="tab-btn-responsive"
-            style={{
-              backgroundColor: currentSection === 'scenography' ? 'var(--accent-light)' : 'transparent',
-              color: currentSection === 'scenography' ? 'var(--accent)' : 'var(--text-secondary)',
-              boxShadow: currentSection === 'scenography' ? 'inset 0 0 0 1px var(--accent-border)' : 'none'
-            }}
-          >
-            <MapPin size={13} />
-            <span className="text-desktop-only">1. Avant : Calibrage</span>
-            <span className="text-mobile-only">1. Calibrage</span>
-          </button>
-
-          <button
-            onClick={() => {
-              sounds.playClick(850);
-              setCurrentSection('questions');
-            }}
-            className="tab-btn-responsive"
-            style={{
-              backgroundColor: currentSection === 'questions' ? 'var(--accent-light)' : 'transparent',
-              color: currentSection === 'questions' ? 'var(--accent)' : 'var(--text-secondary)',
-              boxShadow: currentSection === 'questions' ? 'inset 0 0 0 1px var(--accent-border)' : 'none'
-            }}
-          >
-            <Sparkles size={13} />
-            <span className="text-desktop-only">2. Pendant : 36 Questions</span>
-            <span className="text-mobile-only">2. Questions</span>
-          </button>
-
-          <button
-            onClick={() => {
-              sounds.playClick(800);
-              setCurrentSection('arsenal');
-            }}
-            className="tab-btn-responsive"
-            style={{
-              backgroundColor: currentSection === 'arsenal' ? 'var(--accent-light)' : 'transparent',
-              color: currentSection === 'arsenal' ? 'var(--accent)' : 'var(--text-secondary)',
-              boxShadow: currentSection === 'arsenal' ? 'inset 0 0 0 1px var(--accent-border)' : 'none'
-            }}
-          >
-            <Radio size={13} />
-            <span className="text-desktop-only">3. Urgence : Armes</span>
-            <span className="text-mobile-only">3. Armes</span>
-          </button>
-
-          <button
-            onClick={() => {
-              sounds.playGong();
-              setCurrentSection('climax');
-            }}
-            className="tab-btn-responsive"
-            style={{
-              backgroundColor: currentSection === 'climax' ? 'var(--accent-light)' : 'transparent',
-              color: currentSection === 'climax' ? 'var(--accent)' : 'var(--text-secondary)',
-              boxShadow: currentSection === 'climax' ? 'inset 0 0 0 1px var(--accent-border)' : 'none'
-            }}
-          >
-            <Clock size={13} />
-            <span className="text-desktop-only">4. Fin : Climax</span>
-            <span className="text-mobile-only">4. Climax</span>
-          </button>
-        </nav>
-      )}
+      {/* 2. Scrollable App Content Canvas */}
+      <main className="app-content">
 
       {/* =========================================================================
           SECTION 0 : COCKPIT STRATÉGIQUE (DASHBOARD MODERNE)
@@ -539,6 +502,7 @@ export default function App() {
           }}
           onCopySnippet={(text, id) => copyToClipboard(text, id)}
           copiedId={copiedId}
+          onToggleCamouflage={() => setIsCamouflageActive(true)}
         />
       )}
 
@@ -1463,8 +1427,84 @@ export default function App() {
           </div>
         </div>
       )}
+      </main>
 
-      {/* 5. Command Palette Modal (⌘K / Ctrl+K) */}
+      {/* 3. App Bottom Tab Bar (Navigation Native Mobile) */}
+      {!isZenMode && (
+        <nav className="app-tab-bar">
+          <button
+            onClick={() => {
+              sounds.playClick(900);
+              setCurrentSection('dashboard');
+            }}
+            className={`tab-bar-item ${currentSection === 'dashboard' ? 'active' : ''}`}
+          >
+            {currentSection === 'dashboard' && <span className="tab-indicator" />}
+            <div className="tab-icon-wrapper">
+              <LayoutDashboard size={18} />
+            </div>
+            <span className="tab-label">Cockpit</span>
+          </button>
+
+          <button
+            onClick={() => {
+              sounds.playClick(750);
+              setCurrentSection('scenography');
+            }}
+            className={`tab-bar-item ${currentSection === 'scenography' ? 'active' : ''}`}
+          >
+            {currentSection === 'scenography' && <span className="tab-indicator" />}
+            <div className="tab-icon-wrapper">
+              <MapPin size={18} />
+            </div>
+            <span className="tab-label">Calibrage</span>
+          </button>
+
+          <button
+            onClick={() => {
+              sounds.playClick(850);
+              setCurrentSection('questions');
+            }}
+            className={`tab-bar-item ${currentSection === 'questions' ? 'active' : ''}`}
+          >
+            {currentSection === 'questions' && <span className="tab-indicator" />}
+            <div className="tab-icon-wrapper">
+              <Sparkles size={18} />
+            </div>
+            <span className="tab-label">Protocole</span>
+          </button>
+
+          <button
+            onClick={() => {
+              sounds.playClick(800);
+              setCurrentSection('arsenal');
+            }}
+            className={`tab-bar-item ${currentSection === 'arsenal' ? 'active' : ''}`}
+          >
+            {currentSection === 'arsenal' && <span className="tab-indicator" />}
+            <div className="tab-icon-wrapper">
+              <Radio size={18} />
+            </div>
+            <span className="tab-label">Arsenal</span>
+          </button>
+
+          <button
+            onClick={() => {
+              sounds.playGong();
+              setCurrentSection('climax');
+            }}
+            className={`tab-bar-item ${currentSection === 'climax' ? 'active' : ''}`}
+          >
+            {currentSection === 'climax' && <span className="tab-indicator" />}
+            <div className="tab-icon-wrapper">
+              <Clock size={18} />
+            </div>
+            <span className="tab-label">Climax</span>
+          </button>
+        </nav>
+      )}
+
+      {/* 4. Command Palette Modal (⌘K / Ctrl+K) */}
       {showCommandPalette && (
         <div style={{
           position: 'fixed',

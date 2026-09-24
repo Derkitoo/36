@@ -33,6 +33,7 @@ interface DashboardProps {
   onToggleTimer: () => void;
   onCopySnippet: (text: string, id: string) => void;
   copiedId: string | null;
+  onToggleCamouflage: () => void;
 }
 
 interface FieldNote {
@@ -53,7 +54,8 @@ export const Dashboard: React.FC<DashboardProps> = ({
   isTimerRunning,
   onToggleTimer,
   onCopySnippet,
-  copiedId
+  copiedId,
+  onToggleCamouflage
 }) => {
   // Profil sélectionné
   const selectedProfile = TARGET_PROFILES.find((p) => p.id === selectedProfileId) || TARGET_PROFILES[0];
@@ -68,9 +70,6 @@ export const Dashboard: React.FC<DashboardProps> = ({
     }
   });
   const [newNoteText, setNewNoteText] = useState('');
-
-  // Mode Camouflage (Fake Notes screen)
-  const [isCamouflageActive, setIsCamouflageActive] = useState(false);
 
   // Chronomètre de session (temps total du date)
   const [sessionSeconds, setSessionSeconds] = useState<number>(() => {
@@ -145,43 +144,6 @@ export const Dashboard: React.FC<DashboardProps> = ({
     ? VOSS_TECHNIQUES[1] // Miroir Chris Voss
     : COLD_READINGS[1]; // Paradoxe force/sensibilité
 
-  // Écran de Camouflage (Fake Notes Apple)
-  if (isCamouflageActive) {
-    return (
-      <div 
-        onClick={() => setIsCamouflageActive(false)}
-        style={{
-          minHeight: '80vh',
-          padding: '24px 18px',
-          backgroundColor: 'var(--bg-surface)',
-          borderRadius: '24px',
-          border: '1px solid var(--border-subtle)',
-          cursor: 'pointer',
-          fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
-        }}
-      >
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px', borderBottom: '1px solid var(--border-subtle)', paddingBottom: '10px' }}>
-          <span style={{ fontSize: '12px', color: 'var(--text-tertiary)', fontWeight: '600' }}>
-            📒 Notes Personnelles • iCloud
-          </span>
-          <span style={{ fontSize: '11px', color: 'var(--text-tertiary)' }}>
-            Touchez pour déverrouiller
-          </span>
-        </div>
-        <h2 style={{ fontSize: '20px', fontWeight: '700', marginBottom: '16px', color: 'var(--text-primary)' }}>
-          To-Do Semaine & Idées
-        </h2>
-        <ul style={{ paddingLeft: '20px', fontSize: '14px', lineHeight: '2', color: 'var(--text-secondary)' }}>
-          <li>Rappel : réserver révision voiture jeudi</li>
-          <li>Acheter café en grains & lait d'avoine</li>
-          <li>Finir la lecture du chapitre 4</li>
-          <li>Envoyer le compte-rendu projet</li>
-          <li>Rangement placard entrée</li>
-        </ul>
-      </div>
-    );
-  }
-
   return (
     <div className="animate-slide-up">
       {/* 1. Cockpit Header Bar */}
@@ -254,7 +216,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
           <button
             onClick={() => {
               sounds.playClick(600);
-              setIsCamouflageActive(true);
+              onToggleCamouflage();
             }}
             title="Masquer l'écran discrètement (Faux bloc-notes)"
             className="glass-pill"

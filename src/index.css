@@ -219,6 +219,140 @@ html, body {
 }
 
 /* ==========================================================================
+   APP SHELL & ARCHITECTURE NATIVE MOBILE
+   ========================================================================== */
+.app-shell {
+  display: flex;
+  flex-direction: column;
+  height: 100dvh;
+  max-height: 100dvh;
+  width: 100%;
+  overflow: hidden;
+  position: relative;
+  background-color: var(--bg-pitch);
+}
+
+.app-header {
+  flex-shrink: 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 16px;
+  padding-top: max(10px, env(safe-area-inset-top));
+  background: var(--bg-card);
+  backdrop-filter: blur(28px) saturate(190%);
+  -webkit-backdrop-filter: blur(28px) saturate(190%);
+  border-bottom: 1px solid var(--border-subtle);
+  z-index: 100;
+}
+
+.app-content {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
+  padding: 16px 14px calc(76px + env(safe-area-inset-bottom, 16px));
+  width: 100%;
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+@media (min-width: 640px) {
+  .app-content {
+    padding: 22px 20px calc(86px + env(safe-area-inset-bottom, 16px));
+  }
+}
+
+/* App Bottom Tab Bar (Navigation Native Mobile) */
+.app-tab-bar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: calc(58px + env(safe-area-inset-bottom, 0px));
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+  background: var(--bg-card);
+  backdrop-filter: blur(30px) saturate(200%);
+  -webkit-backdrop-filter: blur(30px) saturate(200%);
+  border-top: 1px solid var(--border-subtle);
+  box-shadow: 0 -8px 25px rgba(0, 0, 0, 0.05);
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  z-index: 900;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+@media (min-width: 768px) {
+  .app-tab-bar {
+    max-width: 580px;
+    left: 50%;
+    transform: translateX(-50%);
+    bottom: 16px;
+    border-radius: 20px;
+    border: 1px solid var(--border-subtle);
+    box-shadow: var(--card-shadow);
+    height: 56px;
+    padding-bottom: 0;
+  }
+}
+
+.tab-bar-item {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  height: 100%;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--text-tertiary);
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  position: relative;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.tab-bar-item.active {
+  color: var(--accent);
+}
+
+.tab-bar-item .tab-icon-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 28px;
+  border-radius: 10px;
+  transition: all 0.2s ease;
+}
+
+.tab-bar-item.active .tab-icon-wrapper {
+  background: var(--accent-light);
+  transform: translateY(-1px);
+}
+
+.tab-bar-item .tab-label {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: -0.2px;
+}
+
+.tab-bar-item .tab-indicator {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 18px;
+  height: 2.5px;
+  border-radius: 2px;
+  background-color: var(--accent);
+}
+
+/* ==========================================================================
    CLASSES UTILITAIRES RESPONSIVES
    ========================================================================== */
 .container-responsive {
@@ -231,24 +365,6 @@ html, body {
 @media (min-width: 640px) {
   .container-responsive {
     padding: 24px 24px 44px;
-  }
-}
-
-/* Header */
-.header-responsive {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 12px;
-  margin-bottom: 20px;
-  padding-bottom: 14px;
-  border-bottom: 1px solid var(--border-subtle);
-}
-
-@media (max-width: 580px) {
-  .header-responsive {
-    flex-wrap: wrap;
-    gap: 10px;
   }
 }
 
